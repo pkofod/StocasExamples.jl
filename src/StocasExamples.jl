@@ -23,8 +23,8 @@ function am2010(;N = 5, β = 0.95)
     CommonState(X2, M))
 
     Z1 = zeros(nX2*2, 3) # exit
-    Z2 = [-ones(nX2) log(X2) -ones(nX2);# enter
-    -ones(nX2) log(X2)  zeros(nX2)] # buy 5
+    Z2 = [-ones(nX2) log.(X2) -ones(nX2);# enter
+          -ones(nX2) log.(X2)  zeros(nX2)] # buy 5
     Z = [Z1, Z2]
 
     U = LinearUtility(Z, β, truepar)
@@ -46,8 +46,8 @@ function am_tauchen(;β=0.95, # discount factor,
                CommonState(X2, F2))
 
     Z = [zeros(nX2*2, 3), # don't buy
-        [-ones(nX2) log(X2) -ones(nX2); # buy
-         -ones(nX2) log(X2)  zeros(nX2)]]
+        [-ones(nX2) log.(X2) -ones(nX2); # buy
+         -ones(nX2) log.(X2)  zeros(nX2)]]
 
     U = LinearUtility(Z, β, truepar)
 
@@ -150,8 +150,8 @@ function seven(;N = 5, β = 0.95)
 	           CommonState(X2, M))
 
 	Z = [zeros(nX2*2, 3), # don't buy
-	             [-ones(nX2) log(X2) -ones(nX2); # buy
-				  -ones(nX2) log(X2)  zeros(nX2)]]
+	             [-ones(nX2) log.(X2) -ones(nX2); # buy
+				  -ones(nX2) log.(X2)  zeros(nX2)]]
 
 	U = LinearUtility(Z, β, truepar)
 
