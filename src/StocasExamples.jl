@@ -62,7 +62,7 @@ function dixit(;N = 5, β = 0.99)
     # State 2
     nX2 = N
     X2 = 1:nX2
-    F2 = 1./(1+abs(ones(length(X2),1)*X2'-X2*ones(1, length(X2))))
+    F2 = 1./(1+abs.(ones(length(X2),1)*X2'-X2*ones(1, length(X2))))
     F2 = F2./sum(F2,1)'
     # States
     S = States(State("incumbancy", X1, F1), CommonState("market", X2, F2))
