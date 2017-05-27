@@ -40,7 +40,7 @@ function am_tauchen(;β=0.95, # discount factor,
 
     nX2 = N
     X2 = 1:nX2
-    F2 = Extras.tauchen(0.1,0.01,2, nX2)
+    F2 = Stocas.tauchen(0.1,0.01,2, nX2)
 
     S = States(EntryState(),
                CommonState(X2, F2))
