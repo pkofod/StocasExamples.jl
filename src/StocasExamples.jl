@@ -3,30 +3,43 @@ module StocasExamples
 using Stocas
 
 # An example from Aguirregabiria Mira 2010
-function am2010(;N = 5, β = 0.95)
-    # Aguirregabiria & Mira
-    # 2 Model
-    truepar = [-1.9;1.;2.] # fixed costs, ..., entry costs
-    # State 1: Exogenous state
-    X1 = [0;1] # 0 signifies exit and 1 is entry
-    F1 = [sparse([1. 0.; 1. 0.]), sparse([0. 1.; 0. 1.])]
+function am2010(;Nmarket = 5, β = 0.95)
+    ### Aguirregabiria & Mira
+    ## State 1: Endogenous incumbancy state
+    X_entry = EntryState(;dense=false)
 
-    nX2 = N
-    X2 = 1:nX2
-    M = zeros(nX2, nX2)
+    ## State 2: Exogenous market state
+    # Construct a market state with typical probability matrix as below
+    # (shown for Nmarket = 5)
+    # M = [0.8 0.2 0.0 0.0 0.0;
+    #      0.2 0.6 0.2 0.0 0.0;
+    #      0.0 0.2 0.6 0.2 0.0;
+    #      0.0 0.0 0.2 0.6 0.2;
+    #      0.0 0.0 0.0 0.2 0.8;]
+
+    X2 = 1:Nmarket
+    M = zeros(Nmarket, Nmarket)
     p = [0.2, 0.6, 0.2]
+    # First corner
     M[1, 1:2] = [sum(p[1:2]), p[3]]
+    # Last corner
     M[end, end-1:end] = [p[1], sum(p[2:3])]
-    M[2:end-1, :] = vcat([vcat(zeros(i-2), p, zeros(nX2-1-i))' for i = 2:nX2-1]...)
+    # Second to second last rows
+    M[2:end-1, :] = vcat([vcat(zeros(i-2), p, zeros(Nmarket-1-i))' for i = 2:Nmarket-1]...)
 
-    S = States(State(X1, F1),
-    CommonState(X2, M))
+    # Combine states
+    S = States(X_entry, CommonState(X2, M))
 
-    Z1 = zeros(nX2*2, 3) # exit
-    Z2 = [-ones(nX2) log.(X2) -ones(nX2);# enter
-          -ones(nX2) log.(X2)  zeros(nX2)] # buy 5
-    Z = [Z1, Z2]
+    ## Utility specification
+    # Z matrices for
+    # exit choice:
+    Z1 = zeros(Nmarket*2, 3)
+    # entry choice:
+    Z2 = [-ones(Nmarket) log.(X2) -ones(Nmarket);
+          -ones(Nmarket) log.(X2)  zeros(Nmarket)]
+    Z = (Z1, Z2)
 
+    truepar = [-1.9;1.;2.] # fixed costs, ..., entry costs
     U = LinearUtility(Z, β, truepar)
 
     return U, S
@@ -45,9 +58,9 @@ function am_tauchen(;β=0.95, # discount factor,
     S = States(EntryState(),
                CommonState(X2, F2))
 
-    Z = [zeros(nX2*2, 3), # don't buy
-        [-ones(nX2) log.(X2) -ones(nX2); # buy
-         -ones(nX2) log.(X2)  zeros(nX2)]]
+    Z = (zeros(nX2*2, 3), # exit
+        [-ones(nX2) log.(X2) -ones(nX2); # entry
+         -ones(nX2) log.(X2)  zeros(nX2)])
 
     U = LinearUtility(Z, β, truepar)
 
@@ -71,7 +84,7 @@ function dixit(;N = 5, β = 0.99)
     Z1 = zeros(nX2*2, 3)
     Z2 = [ones(nX2) X2 -ones(nX2);
           ones(nX2) X2 zeros(nX2)]
-    U = LinearUtility([Z1, Z2], β, [-.1;.2;1])
+    U = LinearUtility((Z1, Z2), β, [-.1;.2;1])
 
     return U, S
 end
@@ -100,7 +113,7 @@ function hitsch(;N = 20)
           [zeros(1); ones(I)] zeros(I+1) -next_i(0:I, 1)]
     Z2 = [ones(2*(I+1)) -[1.2*ones(I+1);2*ones(I+1)] -kron(ones(2), next_i(0:I, 2))]
     Z3 = [ones(2*(I+1)) -[3.0*ones(I+1);5*ones(I+1)] -kron(ones(2), next_i(0:I, 3))]
-    U = LinearUtility(["Buy 0", "Buy 2", "Buy 5"], [Z1, Z2, Z3], 0.998, [delta; alpha; 0.05])
+    U = LinearUtility(("Buy 0", "Buy 2", "Buy 5"), (Z1, Z2, Z3), 0.998, [delta; alpha; 0.05])
     return U, S
 end
 
@@ -128,7 +141,7 @@ function rust(;N = 175, β = 0.95, sparse = false)
     Z1 = [zeros(nX) -0.001*X]
     Z2 = [-ones(nX) zeros(nX)]
 
-    U = LinearUtility(["replace", "repair"],[Z1, Z2], β, [11.;2.5])
+    U = LinearUtility(("replace", "repair"),(Z1, Z2), β, [11.;2.5])
 
     return U, S
 end
@@ -149,9 +162,9 @@ function seven(;N = 5, β = 0.95)
 	S = States(State(X1, F1),
 	           CommonState(X2, M))
 
-	Z = [zeros(nX2*2, 3), # don't buy
-	             [-ones(nX2) log.(X2) -ones(nX2); # buy
-				  -ones(nX2) log.(X2)  zeros(nX2)]]
+	Z = (zeros(nX2*2, 3), # exit
+	             [-ones(nX2) log.(X2) -ones(nX2); # entry
+				  -ones(nX2) log.(X2)  zeros(nX2)])
 
 	U = LinearUtility(Z, β, truepar)
 
